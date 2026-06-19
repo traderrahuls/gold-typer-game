@@ -517,7 +517,7 @@ export default function GiglifeGame() {
                   const ind=!live&&indicatorLetters.has(k);
                   const act=activeKey===k;
                   return (
-                    <button key={k} onPointerDown={e=>{e.preventDefault();pressKey(k);}} style={{flex:1,maxWidth:38,minWidth:20,height:36,borderRadius:6,border:act?"1px solid #00e5ff":live?"1px solid #00e5ff":ind?"1px solid rgba(0,229,255,0.4)":"1px solid #0a2030",background:act?"#00e5ff":live?"rgba(0,229,255,0.18)":ind?"rgba(0,229,255,0.07)":"rgba(255,255,255,0.02)",color:act?"#04030a":live?"#00e5ff":ind?"rgba(0,229,255,0.5)":"#1a4a5a",fontSize:12,fontWeight:700,textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit",transition:"background 0.08s,color 0.08s",touchAction:"manipulation",boxShadow:ind?"0 0 6px rgba(0,229,255,0.2)":"none"}}>{k}</button>
+                    <button key={k} onPointerDown={e=>{e.preventDefault();pressKey(k);}} style={{flex:1,maxWidth:38,minWidth:20,height:44,borderRadius:6,border:act?"1px solid #00e5ff":live?"1px solid #00e5ff":ind?"1px solid rgba(0,229,255,0.4)":"1px solid #0a2030",background:act?"#00e5ff":live?"rgba(0,229,255,0.18)":ind?"rgba(0,229,255,0.07)":"rgba(255,255,255,0.02)",color:act?"#04030a":live?"#00e5ff":ind?"rgba(0,229,255,0.5)":"#1a4a5a",fontSize:12,fontWeight:700,textTransform:"uppercase",cursor:"pointer",fontFamily:"inherit",transition:"background 0.08s,color 0.08s",touchAction:"manipulation",boxShadow:ind?"0 0 6px rgba(0,229,255,0.2)":"none"}}>{k}</button>
                   );
                 })}
               </div>
