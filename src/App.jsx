@@ -438,6 +438,7 @@ export default function GiglifeGame() {
               </div>
               <button onClick={startGame} style={{background:"linear-gradient(180deg,#00e5ff,#0088aa)",color:"#04030a",border:"none",padding:"14px 50px",fontSize:16,fontWeight:700,letterSpacing:3,borderRadius:10,cursor:"pointer",fontFamily:"'Courier New',monospace",boxShadow:"0 0 30px rgba(0,229,255,0.4)",marginBottom:16}}>START</button>
               <button onClick={()=>setMutedState(m=>!m)} style={{background:"transparent",border:"1px solid #1a3a4a",borderRadius:6,color:"#2a6a7a",fontSize:10,padding:"6px 16px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>{muted?"SOUND: OFF":"SOUND: ON"}</button>
+              <a href="/privacy.html" target="_blank" style={{marginTop:10,display:"block",fontSize:10,color:"#1a4a5a",letterSpacing:1,textDecoration:"none",borderBottom:"1px solid #1a3a4a",paddingBottom:2}}>Privacy Policy</a>
             </div>
           )}
 
