@@ -480,4 +480,279 @@ export default function GiglifeGame() {
           <button onClick={() => setMutedState(m => !m)} style={{ background: muted ? "transparent" : "rgba(0,229,204,0.12)", border: "1px solid " + (muted ? T.keyBdr : T.accent), borderRadius: 20, color: muted ? T.textLo : T.accent, padding: "5px 20px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 2 }}>{muted ? "OFF" : "ON"}</button>
         </div>
       </div>
-      <button onClick={() => setShowSettings(false)} style={{ background: T.accent, color: "#0a1a1a", border: "none", padding: "10px 40px", fontSize: 13, fontWeight: 700, letterSpacing:
+      <button onClick={() => setShowSettings(false)} style={{ background: T.accent, color: "#0a1a1a", border: "none", padding: "10px 40px", fontSize: 13, fontWeight: 700, letterSpacing:13, fontWeight: 700, letterSpacing: 3, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>RESUME</button>
+      <button onClick={goMenu} style={{ background: "transparent", border: "1px solid " + T.keyBdr, borderRadius: 8, color: T.textLo, padding: "8px 28px", fontSize: 11, cursor: "pointer", fontFamily: "inherit", letterSpacing: 2 }}>MAIN MENU</button>
+    </div>
+  );
+
+  return (
+    <div style={{ position: "fixed", inset: 0, fontFamily: "'Courier New', monospace", overflow: "hidden", userSelect: "none", background: T.bg }}>
+      <Starfield />
+      <div style={{
+        position: "relative", zIndex: 1, width: "100%", height: "100%",
+        display: "flex", flexDirection: "column", overflow: "hidden",
+        outline: wrongFlash ? "2px solid " + T.red : "none",
+        transform: shake ? "translate(3px,-2px)" : "none", transition: "transform 0.04s",
+      }}>
+
+        {/* ── HUD ── */}
+        {(screen === "playing" || screen === "waveclear") && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 16px", background: "rgba(10,26,26,0.85)", borderBottom: "1px solid rgba(0,229,204,0.1)", flexShrink: 0, zIndex: 10 }}>
+            <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: 8, color: T.textLo, letterSpacing: 2 }}>WAVE</div>
+                <div style={{ fontSize: 18, color: T.accent, fontWeight: 700, letterSpacing: 2 }}>{waveNum}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 8, color: T.textLo, letterSpacing: 2 }}>SCORE</div>
+                <div style={{ fontSize: 18, color: T.text, fontWeight: 700, letterSpacing: 2 }}>{scoreStr}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 8, color: T.textLo, letterSpacing: 2 }}>COMBO</div>
+                <div style={{ fontSize: 18, color: combo > 4 ? "#fb923c" : T.text, fontWeight: 700 }}>×{combo}</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <div style={{ display: "flex", gap: 5 }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: i < lives ? T.accent : "rgba(0,229,204,0.1)", border: "1px solid rgba(0,229,204,0.3)", transition: "all 0.3s", boxShadow: i < lives ? "0 0 8px " + T.accent : "none" }} />
+                ))}
+              </div>
+              <button onClick={() => setShowSettings(true)} style={{ background: "transparent", border: "1px solid rgba(0,229,204,0.2)", borderRadius: 6, color: T.textLo, fontSize: 10, padding: "4px 10px", cursor: "pointer", fontFamily: "inherit", letterSpacing: 1 }}>⚙</button>
+            </div>
+          </div>
+        )}
+
+        {/* ── GAME AREA ── */}
+        <div ref={areaRef} style={{ flex: 1, position: "relative", overflow: "hidden", minHeight: 0 }}>
+          {showSettings && screen === "playing" && <Settings />}
+
+          {/* ── MENU ── */}
+          {screen === "menu" && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "20px 16px", overflowY: "auto" }}>
+              <div style={{ fontSize: 10, letterSpacing: 6, color: T.textLo, marginBottom: 12 }}>GREAT IDEA · GREAT LIFE</div>
+              <div style={{ fontSize: 58, fontWeight: 900, color: T.accent, letterSpacing: 4, textShadow: "0 0 40px rgba(0,229,204,0.5)", marginBottom: 8, fontFamily: "Georgia, serif", filter: "drop-shadow(0 0 20px rgba(0,229,204,0.4))" }}>GIGLIFE</div>
+              <div style={{ fontSize: 12, color: T.dim, marginBottom: 6, letterSpacing: 1 }}>Type words. Learn English. Level up your life.</div>
+              <div style={{ fontSize: 10, color: T.textLo, marginBottom: 28, maxWidth: 340, lineHeight: 1.8 }}>Words fall from above — type them to destroy them.<br />Miss three and it's game over.</div>
+
+              {/* Mode */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 9, color: T.textLo, letterSpacing: 3, marginBottom: 10 }}>SELECT MODE</div>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                  {[
+                    { key: "english", label: "📚 ENGLISH", desc: "Learn English" },
+                    { key: "trading", label: "📈 TRADING", desc: "Trading terms" },
+                  ].map(m => (
+                    <button key={m.key} onClick={() => setGameMode(m.key)} style={{ padding: "10px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 700, border: "1px solid " + (gameMode === m.key ? T.accent : T.keyBdr), background: gameMode === m.key ? "rgba(0,229,204,0.1)" : "rgba(0,40,36,0.5)", color: gameMode === m.key ? T.accent : T.textLo, transition: "all 0.2s" }}>
+                      <div>{m.label}</div>
+                      <div style={{ fontSize: 9, opacity: 0.5, marginTop: 4 }}>{m.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Difficulty */}
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 9, color: T.textLo, letterSpacing: 3, marginBottom: 10 }}>DIFFICULTY</div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                  {Object.entries(DIFFICULTIES).map(([key, val]) => (
+                    <button key={key} onClick={() => setDifficulty(key)} style={{ padding: "8px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit", fontSize: 10, fontWeight: 700, letterSpacing: 1, border: "1px solid " + (difficulty === key ? val.color : T.keyBdr), background: difficulty === key ? "rgba(0,229,204,0.08)" : "rgba(0,40,36,0.5)", color: difficulty === key ? val.color : T.textLo, transition: "all 0.2s" }}>{val.label}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", justifyContent: "center" }}>
+                <button onClick={() => startGame(gameMode, difficulty, null)} style={{ background: T.accent, color: "#0a1a1a", border: "none", padding: "13px 44px", fontSize: 15, fontWeight: 700, letterSpacing: 3, borderRadius: 8, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 0 30px rgba(0,229,204,0.4)" }}>NEW GAME</button>
+                <button onClick={() => setScreen("loadtext")} style={{ background: "transparent", border: "1px solid " + T.accent, color: T.accent, padding: "13px 20px", fontSize: 12, fontWeight: 700, letterSpacing: 2, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>LOAD TEXT</button>
+              </div>
+
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <button onClick={() => setMutedState(m => !m)} style={{ background: "transparent", border: "1px solid " + T.keyBdr, borderRadius: 6, color: T.textLo, fontSize: 10, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit", letterSpacing: 1 }}>{muted ? "🔇 MUTED" : "🔊 SOUND"}</button>
+                <a href="/privacy.html" target="_blank" style={{ fontSize: 9, color: T.textLo, letterSpacing: 1, textDecoration: "none", borderBottom: "1px solid " + T.keyBdr, paddingBottom: 2 }}>Privacy Policy</a>
+              </div>
+            </div>
+          )}
+
+          {/* ── LOAD TEXT ── */}
+          {screen === "loadtext" && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px 20px", overflowY: "auto" }}>
+              <div style={{ fontSize: 11, letterSpacing: 4, color: T.textLo, marginBottom: 16 }}>LOAD YOUR OWN TEXT</div>
+              <div style={{ fontSize: 11, color: T.textLo, marginBottom: 16, maxWidth: 360, textAlign: "center", lineHeight: 1.7 }}>
+                Paste any text below. Each word becomes an enemy.<br />
+                Perfect for learning custom vocabulary!
+              </div>
+              <textarea
+                value={customText}
+                onChange={e => { setCustomText(e.target.value); setCustomError(""); }}
+                placeholder="Paste your text here... Each sentence becomes a wave of enemies."
+                style={{
+                  width: "100%", maxWidth: 400, height: 160,
+                  background: "rgba(0,40,36,0.6)", border: "1px solid " + T.keyBdr,
+                  borderRadius: 8, color: T.text, fontSize: 13, padding: "12px",
+                  fontFamily: "inherit", resize: "vertical", outline: "none",
+                  lineHeight: 1.6,
+                }}
+              />
+              {customError && <div style={{ color: T.red, fontSize: 11, marginTop: 8 }}>{customError}</div>}
+              <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap", justifyContent: "center" }}>
+                <button onClick={() => {
+                  const waves = parseCustomText(customText);
+                  if (!waves) { setCustomError("Too few words! Paste at least 8 words."); return; }
+                  startGame(gameMode, difficulty, waves);
+                }} style={{ background: T.accent, color: "#0a1a1a", border: "none", padding: "11px 36px", fontSize: 13, fontWeight: 700, letterSpacing: 2, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>PLAY!</button>
+                <button onClick={() => { setScreen("menu"); setCustomError(""); }} style={{ background: "transparent", border: "1px solid " + T.keyBdr, borderRadius: 8, color: T.textLo, padding: "11px 24px", fontSize: 12, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1 }}>BACK</button>
+              </div>
+            </div>
+          )}
+
+          {/* ── PLAYING ── */}
+          {screen === "playing" && (<>
+            {enemies.map(e => {
+              const isTgt = e.word.startsWith(typed) && typed.length > 0;
+              const isInd = !isTgt && !typed.length && indLetters.has(e.word[0]);
+              const tp = isTgt ? typed : "";
+              const rp = isTgt ? e.word.slice(typed.length) : e.word;
+              return (
+                <div key={e.id} style={{
+                  position: "absolute", left: e.x, top: e.y,
+                  transform: `translate(-50%,-50%) scale(${e.hit ? 1.8 : 1})`,
+                  opacity: e.hit ? 0 : 1,
+                  transition: e.hit ? "opacity 0.15s,transform 0.15s" : "none",
+                  fontSize: 16, fontWeight: 700, padding: "5px 12px", borderRadius: 4,
+                  background: isTgt ? "rgba(0,229,204,0.12)" : "rgba(10,26,26,0.88)",
+                  border: "1px solid " + (isTgt ? T.accent : isInd ? "rgba(0,229,204,0.3)" : "rgba(0,229,204,0.14)"),
+                  whiteSpace: "nowrap", pointerEvents: "none",
+                  boxShadow: isTgt ? "0 0 18px rgba(0,229,204,0.22)" : "none",
+                  letterSpacing: 1,
+                }}>
+                  {isInd && <div style={{ position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: "50%", background: T.accent, boxShadow: "0 0 6px " + T.accent }} />}
+                  <span style={{ color: T.typed }}>{tp}</span>
+                  <span style={{ color: isTgt ? T.text : isInd ? "rgba(0,229,204,0.65)" : T.textLo }}>{rp}</span>
+                </div>
+              );
+            })}
+
+            {particles.map(p => (
+              <div key={p.id} style={{ position: "absolute", left: p.x, top: p.y, transform: "translate(-50%,-50%)", color: T.accent, fontWeight: 700, fontSize: 14, opacity: Math.max(p.life * 2, 0), pointerEvents: "none", textShadow: "0 0 8px " + T.accent }}>{p.text}</div>
+            ))}
+
+            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" }}>
+              <defs>
+                <filter id="glow2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              {bullets.map(b => {
+                const t = 1 - Math.max(b.life, 0);
+                const prog = Math.min(t, 1);
+                const cx2 = b.fromX + (b.toX - b.fromX) * prog;
+                const cy2 = b.fromY + (b.toY - b.fromY) * prog;
+                const tx = b.fromX + (b.toX - b.fromX) * Math.max(prog - 0.16, 0);
+                const ty = b.fromY + (b.toY - b.fromY) * Math.max(prog - 0.16, 0);
+                return <line key={b.id} x1={tx} y1={ty} x2={cx2} y2={cy2} stroke={T.accent} strokeWidth={2} strokeLinecap="round" opacity={Math.min(b.life * 1.5, 1)} filter="url(#glow2)" />;
+              })}
+            </svg>
+
+            {/* ship — ZType style */}
+            <div style={{ position: "absolute", left: "50%", bottom: 10, transform: "translateX(-50%)", pointerEvents: "none", filter: "drop-shadow(0 0 10px rgba(0,229,204,0.7))" }}>
+              <svg viewBox="0 0 60 60" width="38" height="38">
+                <polygon points="30,2 44,42 30,32 16,42" fill={T.accent} stroke="#aafff5" strokeWidth="0.8" />
+                <polygon points="30,2 37,30 30,24 23,30" fill="#ffffff" opacity="0.9" />
+                <circle cx="30" cy="20" r="3.5" fill="#0a1a1a" opacity="0.8" />
+                <polygon points="16,42 10,56 22,46" fill="#008878" />
+                <polygon points="44,42 50,56 38,46" fill="#008878" />
+                <line x1="30" y1="42" x2="30" y2="58" stroke="rgba(0,229,204,0.4)" strokeWidth="2" />
+              </svg>
+            </div>
+
+            <div style={{ position: "absolute", left: 0, right: 0, bottom: 50, height: 1, background: "linear-gradient(90deg,transparent,rgba(244,63,94,0.5),transparent)" }} />
+          </>)}
+
+          {/* ── WAVE CLEAR ── */}
+          {screen === "waveclear" && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", padding: "0 32px" }}>
+              <div style={{ fontSize: 32, fontWeight: 900, color: T.accent, letterSpacing: 4, marginBottom: 8 }}>WAVE {waveNum} CLEAR</div>
+              <div style={{ fontSize: 14, color: T.textLo, letterSpacing: 3, marginBottom: 32 }}>SCORE: {scoreStr}</div>
+              {waveIdx + 1 < waves.length ? (
+                <div style={{ fontSize: 12, color: T.dim, letterSpacing: 2, animation: "blink 1s infinite" }}>TAP TO CONTINUE →</div>
+              ) : (
+                <div style={{ fontSize: 12, color: T.accent, letterSpacing: 2 }}>ALL WAVES COMPLETE!</div>
+              )}
+              <button
+                onClick={nextWave}
+                style={{ marginTop: 24, background: T.accent, color: "#0a1a1a", border: "none", padding: "12px 36px", fontSize: 13, fontWeight: 700, letterSpacing: 2, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>
+                {waveIdx + 1 < waves.length ? "NEXT WAVE" : "FINISH"}
+              </button>
+            </div>
+          )}
+
+          {/* ── GAME OVER ── */}
+          {screen === "gameover" && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, background: "rgba(10,26,26,0.92)" }}>
+              <div style={{ fontSize: 11, letterSpacing: 4, color: T.red, marginBottom: 12 }}>GAME OVER</div>
+              <div style={{ fontSize: 48, fontWeight: 900, color: T.text, marginBottom: 4, fontFamily: "Georgia,serif", letterSpacing: 3 }}>{scoreStr}</div>
+              <div style={{ fontSize: 11, color: T.textLo, letterSpacing: 3, marginBottom: 28 }}>FINAL SCORE</div>
+              <div style={{ display: "flex", gap: 28, marginBottom: 32, flexWrap: "wrap", justifyContent: "center" }}>
+                {[
+                  { label: "BEST COMBO", val: "×" + bestCombo, color: "#fb923c" },
+                  { label: "HIGH SCORE", val: String(highScore).padStart(6, "0"), color: T.accent },
+                  { label: "WAVE", val: waveNum, color: T.text },
+                ].map(s => (
+                  <div key={s.label}>
+                    <div style={{ fontSize: 9, color: T.textLo, letterSpacing: 2, marginBottom: 4 }}>{s.label}</div>
+                    <div style={{ fontSize: 20, color: s.color, fontWeight: 700, letterSpacing: 2 }}>{s.val}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => startGame(gameMode, difficulty, null)} style={{ background: T.accent, color: "#0a1a1a", border: "none", padding: "12px 44px", fontSize: 14, fontWeight: 700, letterSpacing: 3, borderRadius: 8, cursor: "pointer", fontFamily: "inherit", marginBottom: 12, boxShadow: "0 0 24px rgba(0,229,204,0.3)" }}>PLAY AGAIN</button>
+              <button onClick={goMenu} style={{ background: "transparent", border: "1px solid " + T.keyBdr, borderRadius: 8, color: T.textLo, padding: "9px 28px", fontSize: 11, cursor: "pointer", fontFamily: "inherit", letterSpacing: 2 }}>MAIN MENU</button>
+            </div>
+          )}
+        </div>
+
+        {/* ── TYPED DISPLAY ── */}
+        {screen === "playing" && (
+          <div style={{ padding: "6px 16px", background: "rgba(10,26,26,0.88)", borderTop: "1px solid rgba(0,229,204,0.08)", minHeight: 34, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+            <span style={{ fontSize: 17, letterSpacing: 4, color: T.accent, fontWeight: 700 }}>
+              {typed || "\u00A0"}
+              <span style={{ opacity: 0.4, animation: "blink 1s infinite" }}>_</span>
+            </span>
+            {gameMode === "english" && wordHint && (
+              <span style={{ fontSize: 11, color: T.textLo, letterSpacing: 1 }}>→ <span style={{ color: T.dim }}>{wordHint}</span></span>
+            )}
+          </div>
+        )}
+
+        {/* ── KEYBOARD ── */}
+        {screen === "playing" && (
+          <div style={{ padding: "10px 10px 14px", background: "rgba(0,20,18,0.95)", borderTop: "1px solid rgba(0,229,204,0.08)", flexShrink: 0 }}>
+            {KEY_ROWS.map((row, ri) => (
+              <div key={ri} style={{ display: "flex", justifyContent: "center", gap: 5, marginBottom: 5, paddingLeft: ri === 1 ? 18 : ri === 2 ? 36 : 0, paddingRight: ri === 1 ? 18 : ri === 2 ? 36 : 0 }}>
+                {row.map(k => {
+                  const live = liveLetters.has(k);
+                  const ind = !live && indLetters.has(k);
+                  const act = activeKey === k;
+                  return (
+                    <button key={k} onPointerDown={e => { e.preventDefault(); pressKey(k); }} style={{
+                      flex: 1, maxWidth: 44, minWidth: 24, height: 48,
+                      borderRadius: 6, fontWeight: 700, fontSize: 15,
+                      textTransform: "uppercase", cursor: "pointer",
+                      fontFamily: "inherit", touchAction: "manipulation",
+                      transition: "all 0.06s",
+                      border: "1px solid " + (act || live ? T.accent : ind ? "rgba(0,229,204,0.3)" : T.keyBdr),
+                      background: act ? T.accent : live ? T.keyLit : ind ? "rgba(0,229,204,0.06)" : T.keyBg,
+                      color: act ? "#0a1a1a" : live ? T.accent : ind ? "rgba(0,229,204,0.5)" : T.textLo,
+                      boxShadow: act ? "0 0 14px rgba(0,229,204,0.5)" : live ? "0 0 8px rgba(0,229,204,0.2)" : "none",
+                    }}>{k}</button>
+                  );
+                })}
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 5 }}>
+              <button onPointerDown={e => { e.preventDefault(); handleBS(); }} style={{ width: 160, height: 40, borderRadius: 6, border: "1px solid " + T.keyBdr, background: T.keyBg, color: T.textLo, fontSize: 12, fontWeight: 700, letterSpacing: 1, cursor: "pointer", fontFamily: "inherit", touchAction: "manipulation" }}>⌫  BACKSPACE</button>
+            </div>
+          </div>
+        )}
+      </div>
+      <style>{`@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}*{box-sizing:border-box}body{margin:0;overflow:hidden}`}</style>
+    </div>
+  );
+}
