@@ -121,9 +121,10 @@ function useAudio() {
   const startMusic = useCallback(() => {
     if (musicT.current) return;
     const audio = new Audio("/Chill_Relaxing_Lofi_Hip_Hop_Instrumental_-_Starstruck_256k_.mp3");
-    audio.loop = true;
-    audio.volume = mutedR.current ? 0 : Math.min(volR.current, 1);
-    audio.play().catch(() => {});
+audio.loop = true;
+audio.preload = "none";
+audio.volume = mutedR.current ? 0 : Math.min(volR.current, 1);
+setTimeout(() => { audio.play().catch(() => {}); }, 500);
     musicT.current = audio;
   }, []);
 
