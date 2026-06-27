@@ -90,7 +90,7 @@ let eid = 0, pid = 0, bid = 0;
 // ── AUDIO ────────────────────────────────────────────────────────────────────
 function useAudio() {
   const ctxR = useRef(null), mastR = useRef(null);
-  const musicT = useRef(null), mutedR = useRef(false);
+  const musicT = useRef(null), mutedR = useRef(false), volR = useRef(0.8);
 
   const getCtx = useCallback(() => {
     if (!ctxR.current) {
@@ -98,7 +98,7 @@ function useAudio() {
       if (!AC) return null;
       ctxR.current = new AC();
       mastR.current = ctxR.current.createGain();
-      mastR.current.gain.value = 0.28;
+      mastR.current.gain.value = 0.8;
       mastR.current.connect(ctxR.current.destination);
     }
     if (ctxR.current.state === "suspended") ctxR.current.resume();
@@ -119,33 +119,32 @@ function useAudio() {
   }, [getCtx]);
 
   const startMusic = useCallback(() => {
-    const c = getCtx(); if (!c || musicT.current) return;
-    const mg = c.createGain(); mg.gain.value = 0.055; mg.connect(mastR.current);
-    const scale = [130.81, 146.83, 164.81, 196.00, 220.00, 246.94, 261.63, 293.66];
-    let step = 0;
-    const tick = () => {
-      if (!mutedR.current) {
-        const o = c.createOscillator(), g = c.createGain();
-        o.type = "triangle";
-        o.frequency.value = scale[step % scale.length] * (step % 16 < 8 ? 1 : 2);
-        g.gain.setValueAtTime(0.001, c.currentTime);
-        g.gain.linearRampToValueAtTime(0.07, c.currentTime + 0.06);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
-        o.connect(g); g.connect(mg);
-        o.start(); o.stop(c.currentTime + 0.44);
-        step++;
-      }
-      musicT.current = setTimeout(tick, 510);
-    };
-    tick();
-  }, [getCtx]);
-
-  const stopMusic = useCallback(() => {
-    if (musicT.current) { clearTimeout(musicT.current); musicT.current = null; }
+    if (musicT.current) return;
+    const audio = new Audio("/Chill_Relaxing_Lofi_Hip_Hop_Instrumental_-_Starstruck_256k_.mp3");
+    audio.loop = true;
+    audio.volume = mutedR.current ? 0 : Math.min(volR.current, 1);
+    audio.play().catch(() => {});
+    musicT.current = audio;
   }, []);
 
-  const setMuted = useCallback((m) => { mutedR.current = m; }, []);
-  const setVol = useCallback((v) => { if (mastR.current) mastR.current.gain.value = v; }, []);
+  const stopMusic = useCallback(() => {
+    if (musicT.current) {
+      musicT.current.pause();
+      musicT.current.currentTime = 0;
+      musicT.current = null;
+    }
+  }, []);
+
+  const setMuted = useCallback((m) => {
+    mutedR.current = m;
+    if (musicT.current) musicT.current.volume = m ? 0 : Math.min(volR.current, 1);
+  }, []);
+
+  const setVol = useCallback((v) => {
+    volR.current = v;
+    if (mastR.current) mastR.current.gain.value = v;
+    if (musicT.current && !mutedR.current) musicT.current.volume = Math.min(v, 1);
+  }, []);
 
   const sfx = {
     type:     useCallback(() => tone(700, 0.04, "square", 0.08), [tone]),
@@ -224,7 +223,7 @@ export default function GiglifeGame() {
   const [highScore, setHighScore]     = useState(0);
   const [shake, setShake]             = useState(false);
   const [muted, setMutedState]        = useState(false);
-  const [volume, setVolState]         = useState(0.28);
+  const [volume, setVolState]         = useState(0.8);
   const [activeKey, setActiveKey]     = useState(null);
   const [wrongFlash, setWrongFlash]   = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -480,7 +479,7 @@ export default function GiglifeGame() {
           <button onClick={() => setMutedState(m => !m)} style={{ background: muted ? "transparent" : "rgba(0,229,204,0.12)", border: "1px solid " + (muted ? T.keyBdr : T.accent), borderRadius: 20, color: muted ? T.textLo : T.accent, padding: "5px 20px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 2 }}>{muted ? "OFF" : "ON"}</button>
         </div>
       </div>
-      <button onClick={() => setShowSettings(false)} style={{ background: T.accent, color: "#0a1a1a", border: "none", padding: "10px 40px", fontSize: 13, fontWeight: 700, letterSpacing:13, fontWeight: 700, letterSpacing: 3, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>RESUME</button>
+      <button onClick={() => setShowSettings(false)} style={{ background: T.accent, color: "#0a1a1a", border: "none", padding: "10px 40px", fontSize: 13, fontWeight: 700, letterSpacing: 3, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>RESUME</button>
       <button onClick={goMenu} style={{ background: "transparent", border: "1px solid " + T.keyBdr, borderRadius: 8, color: T.textLo, padding: "8px 28px", fontSize: 11, cursor: "pointer", fontFamily: "inherit", letterSpacing: 2 }}>MAIN MENU</button>
     </div>
   );
@@ -566,9 +565,59 @@ export default function GiglifeGame() {
                 <button onClick={() => setScreen("loadtext")} style={{ background: "transparent", border: "1px solid " + T.accent, color: T.accent, padding: "13px 20px", fontSize: 12, fontWeight: 700, letterSpacing: 2, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>LOAD TEXT</button>
               </div>
 
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 20 }}>
                 <button onClick={() => setMutedState(m => !m)} style={{ background: "transparent", border: "1px solid " + T.keyBdr, borderRadius: 6, color: T.textLo, fontSize: 10, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit", letterSpacing: 1 }}>{muted ? "🔇 MUTED" : "🔊 SOUND"}</button>
                 <a href="/privacy.html" target="_blank" style={{ fontSize: 9, color: T.textLo, letterSpacing: 1, textDecoration: "none", borderBottom: "1px solid " + T.keyBdr, paddingBottom: 2 }}>Privacy Policy</a>
+              </div>
+
+              {/* ── HOME SETTINGS PANEL ── */}
+              <div style={{
+                width: "100%", maxWidth: 360,
+                border: "1px solid rgba(0,229,204,0.15)",
+                borderRadius: 12, padding: "16px 20px",
+                background: "rgba(0,40,36,0.45)",
+                display: "flex", flexDirection: "column", gap: 14,
+              }}>
+                <div style={{ fontSize: 9, color: T.textLo, letterSpacing: 3, textAlign: "center", marginBottom: 2 }}>⚙ SETTINGS</div>
+
+                {/* Volume slider */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontSize: 10, color: T.textLo, letterSpacing: 2 }}>🔊 VOLUME</span>
+                    <span style={{ fontSize: 12, color: T.accent, fontWeight: 700 }}>{Math.round(volume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range" min="0" max="1" step="0.05"
+                    value={volume}
+                    onChange={e => setVolState(parseFloat(e.target.value))}
+                    style={{ width: "100%", accentColor: T.accent, cursor: "pointer" }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+                    <span style={{ fontSize: 9, color: T.textLo }}>0%</span>
+                    <span style={{ fontSize: 9, color: T.textLo }}>100%</span>
+                  </div>
+                </div>
+
+                {/* Mute toggle */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 10, color: T.textLo, letterSpacing: 2 }}>MUTE ALL</span>
+                  <button
+                    onClick={() => setMutedState(m => !m)}
+                    style={{
+                      background: muted ? "rgba(244,63,94,0.15)" : "rgba(0,229,204,0.12)",
+                      border: "1px solid " + (muted ? "#f43f5e" : T.accent),
+                      borderRadius: 20, color: muted ? "#f43f5e" : T.accent,
+                      padding: "5px 22px", fontSize: 11, fontWeight: 700,
+                      cursor: "pointer", fontFamily: "inherit", letterSpacing: 2,
+                    }}
+                  >{muted ? "OFF" : "ON"}</button>
+                </div>
+
+                {/* Music note */}
+                <div style={{ fontSize: 9, color: T.textLo, textAlign: "center", lineHeight: 1.6, borderTop: "1px solid rgba(0,229,204,0.08)", paddingTop: 10 }}>
+                  Music starts automatically when game begins.<br/>
+                  Default volume: <span style={{ color: T.accent }}>80%</span>
+                </div>
               </div>
             </div>
           )}
