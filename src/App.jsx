@@ -53,7 +53,7 @@ const PROMO_MESSAGES = [
 const AdBanner = ({ slot="top" }) => {
   const [idx, setIdx] = useState(0);
   useEffect(()=>{
-    const t = setInterval(()=> setIdx(i => (i+1) % PROMO_MESSAGES.length), 25000); // har 25 sec pe switch
+    const t = setInterval(()=> setIdx(i => (i+1) % PROMO_MESSAGES.length), 25000); // har 5 sec pe switch
     return ()=> clearInterval(t);
   },[]);
   const m = PROMO_MESSAGES[idx];
