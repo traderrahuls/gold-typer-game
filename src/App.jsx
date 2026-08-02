@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
-import ChessGame from "./games/ChessGame";
-import FruitKnifeBlast from "./games/FruitKnifeBlast";
+import ChessGame from "./ChessGame";
+import FruitKnifeBlast from "./FruitKnifeBlast";
 
 /* ─── FIREBASE (apna config yahan paste karo Firebase Console se) ─── */
 const firebaseConfig = {
